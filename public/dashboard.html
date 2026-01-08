@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Leads - IA Comercial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-card.caliente {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.tibio {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card.frio {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .channel-stats {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .channel-stats h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .channel-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .channel-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .channel-card.web {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .channel-card.instagram {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .channel-card.whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+        }
+
+        .channel-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .channel-card-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .channel-card-total {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .channel-card-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .channel-stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .channel-stat-item h4 {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .channel-stat-item p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filters label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filters select {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .filters select:hover {
+            border-color: #667eea;
+        }
+
+        .filters select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-refresh {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.caliente {
+            background: #fee;
+            color: #d00;
+        }
+
+        .badge.tibio {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .badge.frio {
+            background: #dfe6e9;
+            color: #2d3436;
+        }
+
+        .badge.contactado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-contact {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-contact:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn-contact:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '⏳';
+            display: block;
+            font-size: 3em;
+            margin-top: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .no-data::before {
+            content: '📭';
+            display: block;
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .fecha {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .telefono {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        .telefono a {
+            color: #25D366 !important;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .instagram-link {
+            color: #E1306C !important;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(225, 48, 108, 0.3);
+        }
+
+        .instagram-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(225, 48, 108, 0.5);
+        }
+
+        .telefono a:hover {
+            background: #e8f5e9;
+            transform: translateX(3px);
+        }
+
+        .telefono a:hover span {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Estilos del Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .close {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stat-card {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-refresh {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header con título y estadísticas -->
+        <div class="header">
+            <h1>📊 Panel de Leads</h1>
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <h3 id="stat-total">0</h3>
+                    <p>Total</p>
+                </div>
+                <div class="stat-card caliente">
+                    <h3 id="stat-caliente">0</h3>
+                    <p>🔥 Calientes</p>
+                </div>
+                <div class="stat-card tibio">
+                    <h3 id="stat-tibio">0</h3>
+                    <p>🌡️ Tibios</p>
+                </div>
+                <div class="stat-card frio">
+                    <h3 id="stat-frio">0</h3>
+                    <p>❄️ Fríos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métricas por Canal -->
+        <div class="channel-stats">
+            <h2>📱 Métricas por Canal</h2>
+            <div class="channel-cards" id="channel-cards">
+                <!-- Se llenará dinámicamente con JavaScript -->
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <label for="filter-status">Estado:</label>
+            <select id="filter-status">
+                <option value="">Todos</option>
+                <option value="caliente">🔥 Caliente</option>
+                <option value="tibio">🌡️ Tibio</option>
+                <option value="frio">❄️ Frío</option>
+            </select>
+
+            <label for="filter-contacted">Contactado:</label>
+            <select id="filter-contacted">
+                <option value="">Todos</option>
+                <option value="false">Pendiente</option>
+                <option value="true">Contactado</option>
+            </select>
+
+            <label for="filter-canal">Canal:</label>
+            <select id="filter-canal">
+                <option value="">Todos</option>
+                <option value="web">🌐 Web</option>
+                <option value="whatsapp">💚 WhatsApp</option>
+                <option value="instagram">📸 Instagram</option>
+            </select>
+
+            <button class="btn-refresh" onclick="loadLeads()">🔄 Actualizar</button>
+            <button class="btn-refresh" onclick="openBusinessRulesModal()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                ⚙️ Reglas del Negocio
+            </button>
+        </div>
+
+        <!-- Modal de Reglas del Negocio -->
+        <div id="businessRulesModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ Editar Reglas del Negocio</h2>
+                    <span class="close" onclick="closeBusinessRulesModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Aquí puedes editar cómo el asistente de IA interactúa con los clientes. 
+                        Los cambios se aplican inmediatamente sin necesidad de reiniciar.
+                    </p>
+                    <textarea id="businessRulesText" rows="20" style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.9em; resize: vertical;"></textarea>
+                    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="closeBusinessRulesModal()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Cancelar
+                        </button>
+                        <button onclick="saveBusinessRules()" style="padding: 10px 20px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de leads -->
+        <div class="table-container">
+            <div id="loading" class="loading">Cargando leads...</div>
+            <div id="no-data" class="no-data" style="display: none;">
+                No hay leads disponibles
+            </div>
+            <table id="leads-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Servicio</th>
+                        <th>Comuna</th>
+                        <th>Canal</th>
+                        <th>Estado</th>
+                        <th>Contactado</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // URL base de la API
+        const API_BASE = window.location.origin;
+
+        // Cargar leads al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeads();
+            loadStats();
+
+            // Aplicar filtros automáticamente
+            document.getElementById('filter-status').addEventListener('change', loadLeads);
+            document.getElementById('filter-contacted').addEventListener('change', loadLeads);
+        });
+
+        /**
+         * Cargar estadísticas
+         */
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/leads/estadisticas`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const stats = result.data;
+                    
+                    // Estadísticas generales
+                    document.getElementById('stat-total').textContent = stats.total || 0;
+                    document.getElementById('stat-caliente').textContent = stats.porEstado?.caliente || 0;
+                    document.getElementById('stat-tibio').textContent = stats.porEstado?.tibio || 0;
+                    document.getElementById('stat-frio').textContent = stats.porEstado?.frio || 0;
+
+                    // Métricas por canal
+                    renderChannelStats(stats.porCanalEstado || {});
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        /**
+         * Renderizar métricas por canal
+         */
+        function renderChannelStats(porCanalEstado) {
+            const container = document.getElementById('channel-cards');
+            
+            // Definir canales con sus configuraciones
+            const canales = [
+                { id: 'web', nombre: 'Web', icono: '🌐', clase: 'web' },
+                { id: 'instagram', nombre: 'Instagram', icono: '📸', clase: 'instagram' },
+                { id: 'whatsapp', nombre: 'WhatsApp', icono: '💚', clase: 'whatsapp' }
+            ];
+
+            // Limpiar container
+            container.innerHTML = '';
+
+            // Crear tarjeta para cada canal
+            canales.forEach(canal => {
+                const stats = porCanalEstado[canal.id] || { total: 0, caliente: 0, tibio: 0, frio: 0 };
+                
+                const card = document.createElement('div');
+                card.className = `channel-card ${canal.clase}`;
+                card.innerHTML = `
+                    <div class="channel-card-header">
+                        <div class="channel-card-title">
+                            <span>${canal.icono}</span>
+                            <span>${canal.nombre}</span>
+                        </div>
+                        <div class="channel-card-total">${stats.total}</div>
+                    </div>
+                    <div class="channel-card-stats">
+                        <div class="channel-stat-item">
+                            <h4>${stats.caliente || 0}</h4>
+                            <p>🔥 Calientes</p>
+                        </div>
+                        <div class="channel-stat-item">
+                            <h4>${stats.tibio || 0}</h4>
+                            <p>🌡️ Tibios</p>
+                        </div>
+                        <div class="channel-stat-item">
+                            <h4>${stats.frio || 0}</h4>
+                            <p>❄️ Fríos</p>
+                        </div>
+                    </div>
+                `;
+
+                // Agregar evento click para filtrar por canal
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    document.getElementById('filter-canal').value = canal.id;
+                    loadLeads();
+                    // Scroll a la tabla
+                    document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth' });
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        /**
+         * Cargar leads con filtros
+         */
+        async function loadLeads() {
+            const loading = document.getElementById('loading');
+            const noData = document.getElementById('no-data');
+            const table = document.getElementById('leads-table');
+            const tbody = document.getElementById('leads-tbody');
+
+            // Mostrar loading
+            loading.style.display = 'block';
+            noData.style.display = 'none';
+            table.style.display = 'none';
+
+            try {
+                // Construir query params
+                const params = new URLSearchParams();
+                const status = document.getElementById('filter-status').value;
+                const contacted = document.getElementById('filter-contacted').value;
+                const canal = document.getElementById('filter-canal').value;
+
+                if (status) params.append('estado', status);
+                if (contacted) params.append('contactado', contacted);
+                if (canal) params.append('canal', canal);
+
+                const url = `${API_BASE}/api/leads${params.toString() ? '?' + params.toString() : ''}`;
+                
+                const response = await fetch(url);
+                const result = await response.json();
+
+                loading.style.display = 'none';
+
+                if (result.success && result.data.length > 0) {
+                    // Renderizar tabla
+                    tbody.innerHTML = result.data.map(lead => `
+                        <tr>
+                            <td>#${lead.id}</td>
+                            <td><strong>${lead.nombre || '—'}</strong></td>
+                            <td class="telefono">${formatPhoneLink(lead)}</td>
+                            <td>${lead.servicio || '—'}</td>
+                            <td>${lead.comuna || '—'}</td>
+                            <td>${formatCanalLink(lead)}</td>
+                            <td>
+                                <span class="badge ${lead.estado}">
+                                    ${lead.estado === 'caliente' ? '🔥' : lead.estado === 'tibio' ? '🌡️' : '❄️'}
+                                    ${lead.estado}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${lead.contactado ? 'contactado' : 'pendiente'}">
+                                    ${lead.contactado ? '✅ Contactado' : '⏳ Pendiente'}
+                                </span>
+                            </td>
+                            <td class="fecha">${formatDate(lead.fecha_creacion)}</td>
+                            <td>
+                                <button 
+                                    class="btn-contact" 
+                                    onclick="markAsContacted(${lead.id})"
+                                    ${lead.contactado ? 'disabled' : ''}>
+                                    ${lead.contactado ? 'Contactado' : 'Marcar Contactado'}
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    table.style.display = 'table';
+                } else {
+                    // Sin datos
+                    noData.style.display = 'block';
+                }
+
+                // Recargar estadísticas
+                loadStats();
+
+            } catch (error) {
+                console.error('Error al cargar leads:', error);
+                loading.style.display = 'none';
+                noData.innerHTML = `
+                    <div style="color: #d00;">
+                        ❌ Error al cargar leads<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+                noData.style.display = 'block';
+            }
+        }
+
+        /**
+         * Marcar lead como contactado
+         */
+        async function markAsContacted(leadId) {
+            if (!confirm('¿Marcar este lead como contactado?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/leads/${leadId}`, {
+                    method: 'PATCH'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Lead marcado como contactado');
+                    loadLeads(); // Recargar tabla
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error al marcar como contactado:', error);
+                alert('❌ Error al actualizar el lead');
+            }
+        }
+
+        /**
+         * Formatear canal con ícono
+         */
+        function formatCanal(canal) {
+            const canales = {
+                'web': '🌐 Web',
+                'whatsapp': '💚 WhatsApp',
+                'instagram': '📸 Instagram'
+            };
+            return canales[canal] || '🌐 Web';
+        }
+
+        /**
+         * Formatear canal como enlace clickeable (para Instagram)
+         */
+        function formatCanalLink(lead) {
+            const canal = lead.canal || 'web';
+            
+            // Si es Instagram y tiene instagram_id, crear enlace clickeable
+            if (canal === 'instagram' && lead.instagram_id) {
+                // URL directa a la conversación de Instagram
+                const instagramUrl = `https://www.instagram.com/direct/t/${lead.instagram_id}`;
+                return `<a href="${instagramUrl}" target="_blank" class="instagram-link" title="Abrir conversación en Instagram">
+                    📸 Instagram
+                </a>`;
+            }
+            
+            // Si es WhatsApp, mostrar con ícono
+            if (canal === 'whatsapp') {
+                return '💚 WhatsApp';
+            }
+            
+            // Para Web u otros canales
+            return formatCanal(canal);
+        }
+
+        /**
+         * Formatear teléfono como enlace de WhatsApp
+         */
+        function formatPhoneLink(lead) {
+            if (!lead.telefono) return '—';
+            
+            // Limpiar número (eliminar espacios, guiones, paréntesis y +)
+            const cleanPhone = lead.telefono.replace(/[\s\-\(\)\+]/g, '');
+            
+            // Crear mensaje personalizado
+            const nombre = lead.nombre || 'cliente';
+            const servicio = lead.servicio || 'tu consulta';
+            const mensaje = encodeURIComponent(
+                `Hola ${nombre}, soy de Climatización Express. ` +
+                `Vimos tu consulta sobre ${servicio}. ¿En qué podemos ayudarte?`
+            );
+            
+            // Generar URL de WhatsApp
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${mensaje}`;
+            
+            // Retornar enlace clickable con ícono
+            return `<a href="${whatsappUrl}" target="_blank" style="color: #25D366; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                <span style="font-size: 1.2em;">💬</span>
+                ${lead.telefono}
+            </a>`;
+        }
+
+        /**
+         * Formatear fecha
+         */
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (hours < 1) return 'Hace unos minutos';
+            if (hours < 24) return `Hace ${hours}h`;
+            if (days === 1) return 'Ayer';
+            if (days < 7) return `Hace ${days} días`;
+
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        /**
+         * Abrir modal de reglas del negocio
+         */
+        async function openBusinessRulesModal() {
+            const modal = document.getElementById('businessRulesModal');
+            const textarea = document.getElementById('businessRulesText');
+            
+            modal.style.display = 'block';
+            textarea.value = 'Cargando...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/system/prompt`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    textarea.value = result.data.prompt;
+                } else {
+                    alert('Error al cargar las reglas: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error al cargar reglas:', error);
+                alert('Error al cargar las reglas del negocio');
+            }
+        }
+
+        /**
+         * Cerrar modal de reglas del negocio
+         */
+        function closeBusinessRulesModal() {
+            const modal = document.getElementById('businessRulesModal');
+            modal.style.display = 'none';
+        }
+
+        /**
+         * Guardar reglas del negocio
+         */
+        async function saveBusinessRules() {
+            const textarea = document.getElementById('businessRulesText');
+            const newPrompt = textarea.value.trim();
+            
+            if (!newPrompt) {
+                alert('El prompt no puede estar vacío');
+                return;
+            }
+            
+            if (!confirm('¿Estás seguro de que quieres actualizar las reglas del negocio? Los cambios se aplicarán inmediatamente.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/system/prompt`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: newPrompt
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Reglas del negocio actualizadas correctamente');
+                    closeBusinessRulesModal();
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error al guardar reglas:', error);
+                alert('❌ Error al guardar las reglas del negocio');
+            }
+        }
+
+        // Cerrar modal al hacer click fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('businessRulesModal');
+            if (event.target == modal) {
+                closeBusinessRulesModal();
+            }
+        }
+    </script>
+</body>
+</html>
+

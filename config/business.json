@@ -1,0 +1,144 @@
+{
+  "business": {
+    "name": "Climatización Express",
+    "shortName": "Climatización",
+    "industry": "Servicios de climatización",
+    "description": "Empresa especializada en instalación, mantenimiento y reparación de sistemas de aire acondicionado",
+    "phone": "+56912345678",
+    "email": "contacto@climatizacion.cl",
+    "website": "https://www.climatizacion.cl"
+  },
+  "services": [
+    {
+      "id": "instalacion",
+      "name": "Instalación de Aire Acondicionado",
+      "description": "Instalación profesional de equipos residenciales y comerciales",
+      "estimatedTime": "1-2 días",
+      "requiresVisit": true
+    },
+    {
+      "id": "mantenimiento",
+      "name": "Mantenimiento Preventivo",
+      "description": "Limpieza, revisión y ajuste de equipos",
+      "estimatedTime": "2-3 horas",
+      "requiresVisit": true
+    },
+    {
+      "id": "reparacion",
+      "name": "Reparación",
+      "description": "Diagnóstico y reparación de fallas en equipos",
+      "estimatedTime": "Según diagnóstico",
+      "requiresVisit": true
+    },
+    {
+      "id": "limpieza",
+      "name": "Limpieza Profunda",
+      "description": "Limpieza completa de filtros y componentes internos",
+      "estimatedTime": "1-2 horas",
+      "requiresVisit": true
+    },
+    {
+      "id": "cotizacion",
+      "name": "Cotización",
+      "description": "Evaluación y presupuesto sin compromiso",
+      "estimatedTime": "Inmediato",
+      "requiresVisit": false
+    }
+  ],
+  "coverage": {
+    "regions": ["Región Metropolitana"],
+    "communes": [
+      "Santiago",
+      "Providencia",
+      "Las Condes",
+      "Vitacura",
+      "Lo Barnechea",
+      "La Reina",
+      "Ñuñoa",
+      "Macul",
+      "Peñalolén",
+      "La Florida",
+      "San Miguel",
+      "Maipú",
+      "Pudahuel",
+      "Cerrillos",
+      "Estación Central"
+    ],
+    "additionalFees": {
+      "enabled": true,
+      "message": "Comunas fuera de cobertura pueden tener recargo por traslado"
+    }
+  },
+  "schedule": {
+    "timezone": "America/Santiago",
+    "workingDays": {
+      "monday": { "enabled": true, "open": "08:00", "close": "18:00" },
+      "tuesday": { "enabled": true, "open": "08:00", "close": "18:00" },
+      "wednesday": { "enabled": true, "open": "08:00", "close": "18:00" },
+      "thursday": { "enabled": true, "open": "08:00", "close": "18:00" },
+      "friday": { "enabled": true, "open": "08:00", "close": "18:00" },
+      "saturday": { "enabled": true, "open": "09:00", "close": "14:00" },
+      "sunday": { "enabled": false, "open": null, "close": null }
+    },
+    "emergencyService": {
+      "enabled": true,
+      "hours": "24/7",
+      "additionalFee": true
+    },
+    "holidays": {
+      "attendHolidays": false,
+      "message": "No atendemos días festivos salvo emergencias"
+    }
+  },
+  "pricing": {
+    "showPrices": false,
+    "requireQuote": true,
+    "message": "Los precios varían según el tipo de equipo y complejidad del trabajo",
+    "paymentMethods": [
+      "Efectivo",
+      "Transferencia bancaria",
+      "Tarjetas de crédito/débito",
+      "Mercado Pago"
+    ]
+  },
+  "qualifications": {
+    "certifications": [
+      "Certificación SEC (Superintendencia de Electricidad y Combustibles)",
+      "Técnicos especializados en marcas principales"
+    ],
+    "experience": "15 años de experiencia en el mercado",
+    "warranty": "6 meses de garantía en todos los trabajos"
+  },
+  "conversationStyle": {
+    "tone": "profesional y cercano",
+    "formality": "tú",
+    "personality": "Amigable, servicial y eficiente. Enfocado en entender la necesidad del cliente y ofrecer soluciones rápidas.",
+    "guidelines": [
+      "Preguntar por nombre, teléfono y comuna",
+      "Clasificar la urgencia del servicio",
+      "Ofrecer alternativas si el servicio no está disponible",
+      "Ser proactivo en agendar visitas o cotizaciones",
+      "Confirmar datos antes de despedirse"
+    ]
+  },
+  "notifications": {
+    "ownerEmail": "propietario@climatizacion.cl",
+    "ownerPhone": "+56987654321",
+    "notifyOn": ["caliente"],
+    "emailSubjectPrefix": "🔥 Lead Caliente -"
+  },
+  "branding": {
+    "primaryColor": "#f5576c",
+    "secondaryColor": "#667eea",
+    "logo": null,
+    "slogan": "Tu confort, nuestra prioridad"
+  },
+  "metadata": {
+    "version": "1.0",
+    "createdAt": "2026-01-07",
+    "lastUpdated": "2026-01-07",
+    "clientId": "climatizacion-express",
+    "instanceType": "production"
+  }
+}
+

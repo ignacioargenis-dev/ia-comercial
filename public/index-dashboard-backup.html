@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA Comercial - Panel de Leads</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1>🤖 IA Comercial</h1>
+        <p class="subtitle">Panel de Gestión de Leads</p>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBtn" class="btn btn-primary">
+          🔄 Actualizar
+        </button>
+      </div>
+    </header>
+
+    <!-- Estadísticas -->
+    <div class="stats-container" id="statsContainer">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-value" id="totalLeads">0</div>
+          <div class="stat-label">Total Leads</div>
+        </div>
+      </div>
+      <div class="stat-card caliente">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-content">
+          <div class="stat-value" id="calienteLeads">0</div>
+          <div class="stat-label">Calientes</div>
+        </div>
+      </div>
+      <div class="stat-card tibio">
+        <div class="stat-icon">🌡️</div>
+        <div class="stat-content">
+          <div class="stat-value" id="tibioLeads">0</div>
+          <div class="stat-label">Tibios</div>
+        </div>
+      </div>
+      <div class="stat-card frio">
+        <div class="stat-icon">❄️</div>
+        <div class="stat-content">
+          <div class="stat-value" id="frioLeads">0</div>
+          <div class="stat-label">Fríos</div>
+        </div>
+      </div>
+      <div class="stat-card pendientes">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-content">
+          <div class="stat-value" id="pendientesLeads">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <button class="filter-btn active" data-filter="todos">Todos</button>
+      <button class="filter-btn" data-filter="caliente">🔥 Calientes</button>
+      <button class="filter-btn" data-filter="tibio">🌡️ Tibios</button>
+      <button class="filter-btn" data-filter="frio">❄️ Fríos</button>
+      <button class="filter-btn" data-filter="pendientes">⏳ Pendientes</button>
+      <button class="filter-btn" data-filter="contactados">✅ Contactados</button>
+    </div>
+
+    <!-- Tabla de Leads -->
+    <div class="table-container">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Estado</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Servicio</th>
+            <th>Comuna</th>
+            <th>Urgencia</th>
+            <th>Fecha</th>
+            <th>Contactado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="leadsTableBody">
+          <!-- Los leads se cargarán dinámicamente aquí -->
+        </tbody>
+      </table>
+      
+      <!-- Mensaje cuando no hay leads -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📭</div>
+        <h3>No hay leads para mostrar</h3>
+        <p>Los leads capturados por el asistente aparecerán aquí</p>
+      </div>
+    </div>
+
+    <!-- Chat Widget de Prueba -->
+    <div class="chat-widget" id="chatWidget">
+      <div class="chat-header">
+        <span>💬 Probar Asistente</span>
+        <button id="chatToggle">✕</button>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <!-- Mensajes del chat -->
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
+        <button id="chatSend">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Botón flotante para abrir el chat -->
+    <button class="chat-float-btn" id="chatFloatBtn">
+      💬
+    </button>
+  </div>
+
+  <!-- Modal de detalles del lead -->
+  <div id="leadModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Detalles del Lead</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="leadModalBody">
+        <!-- Contenido del lead se cargará aquí -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

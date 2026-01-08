@@ -1,0 +1,405 @@
+# 📸 Soporte de Canal Instagram en Base de Datos - COMPLETADO
+
+## ✅ Implementación
+
+Se extendió el sistema de base de datos para soportar el canal "Instagram", permitiendo identificar de qué canal proviene cada lead.
+
+---
+
+## 🗄️ Cambios en la Base de Datos
+
+### Nuevo Campo: `canal`
+
+```sql
+ALTER TABLE leads ADD COLUMN canal TEXT DEFAULT 'web'
+```
+
+**Valores posibles:**
+- `web` - Leads desde el chat web
+- `whatsapp` - Leads desde WhatsApp Business
+- `instagram` - Leads desde Instagram DM
+
+### Migración Automática
+
+✅ La migración se ejecuta automáticamente al iniciar el servidor
+✅ Leads existentes se actualizan con `canal='web'`
+✅ Índice agregado: `idx_leads_canal`
+
+**Salida de la migración:**
+```
+⚙️  Migrando BD: Agregando columna canal
+   ✅ Inicializadas 33 filas existentes con canal='web'
+✅ Migración de BD completada
+```
+
+---
+
+## 📁 Archivos Modificados
+
+### 1. **connection.js**
+
+```javascript
+// Migración automática
+if (!hasCanal) {
+  this.db.exec(`ALTER TABLE leads ADD COLUMN canal TEXT DEFAULT 'web'`);
+  this.db.exec(`UPDATE leads SET canal = 'web' WHERE canal IS NULL`);
+}
+
+// Esquema tabla leads
+CREATE TABLE IF NOT EXISTS leads (
+  ...
+  canal TEXT DEFAULT 'web',
+  ...
+)
+
+// Nuevo índice
+CREATE INDEX IF NOT EXISTS idx_leads_canal ON leads(canal);
+```
+
+### 2. **Lead.js** (Entidad)
+
+```javascript
+constructor(data) {
+  ...
+  this.canal = data.canal || 'web';
+}
+
+toJSON() {
+  return {
+    ...
+    canal: this.canal,
+    ...
+  };
+}
+```
+
+### 3. **SqliteLeadRepository.js**
+
+```javascript
+// Método save()
+INSERT INTO leads (..., canal, ...)
+VALUES (..., ?, ...)
+
+// Método findAll() - nuevo filtro
+if (filters.canal) {
+  query += ' AND canal = ?';
+  params.push(filters.canal);
+}
+
+// Método getStatistics() - nuevas estadísticas
+const porCanal = {};
+const canalRows = this.db.prepare('SELECT canal, COUNT(*) as count FROM leads GROUP BY canal').all();
+
+// Método rowToLead()
+return new Lead({
+  ...
+  canal: row.canal || 'web',
+  ...
+});
+```
+
+### 4. **ProcessChatMessage.js**
+
+```javascript
+// Asignar canal al lead antes de guardar
+if (finalLead.estaCompleto() && (!conversation || !conversation.lead_id)) {
+  finalLead.canal = channel;  // ← Nuevo
+  savedLead = this.leadRepository.save(finalLead);
+}
+```
+
+### 5. **leads.js** (Routes)
+
+```javascript
+// GET /api/leads - nuevo parámetro
+const { estado, contactado, canal } = req.query;
+
+if (canal) filtros.canal = canal;
+
+// Respuesta incluye canal
+const leadsJSON = leads.map(lead => ({
+  ...
+  canal: lead.canal,
+  ...
+}));
+```
+
+### 6. **dashboard.html**
+
+**Nuevo filtro:**
+```html
+<label for="filter-canal">Canal:</label>
+<select id="filter-canal">
+    <option value="">Todos</option>
+    <option value="web">🌐 Web</option>
+    <option value="whatsapp">💚 WhatsApp</option>
+    <option value="instagram">📸 Instagram</option>
+</select>
+```
+
+**Nueva columna:**
+```html
+<th>Canal</th>
+...
+<td>${formatCanal(lead.canal)}</td>
+```
+
+**Nueva función:**
+```javascript
+function formatCanal(canal) {
+  const canales = {
+    'web': '🌐 Web',
+    'whatsapp': '💚 WhatsApp',
+    'instagram': '📸 Instagram'
+  };
+  return canales[canal] || '🌐 Web';
+}
+```
+
+---
+
+## 🔄 Flujo de Captura de Canal
+
+```
+Usuario envía mensaje en Instagram
+    ↓
+POST /api/instagram/webhook
+    ↓
+HandleIncomingMessage.execute({ channel: 'instagram' })
+    ↓
+ProcessChatMessage.execute({ channel: 'instagram' })
+    ↓
+finalLead.canal = 'instagram'  ← Se asigna aquí
+    ↓
+leadRepository.save(finalLead)
+    ↓
+INSERT INTO leads (..., canal, ...) VALUES (..., 'instagram', ...)
+    ↓
+Lead guardado con canal='instagram' ✅
+```
+
+---
+
+## 📊 Dashboard Actualizado
+
+### Filtros Disponibles:
+
+| Filtro | Opciones |
+|--------|----------|
+| **Estado** | Todos, 🔥 Caliente, 🌡️ Tibio, ❄️ Frío |
+| **Contactado** | Todos, Pendiente, Contactado |
+| **Canal** | Todos, 🌐 Web, 💚 WhatsApp, 📸 Instagram |
+
+### Columnas de la Tabla:
+
+```
+| ID | Nombre | Teléfono | Servicio | Comuna | Canal | Estado | Contactado | Fecha | Acción |
+```
+
+### Visualización del Canal:
+
+- 🌐 **Web** - Verde claro
+- 💚 **WhatsApp** - Verde WhatsApp
+- 📸 **Instagram** - Rosa/Morado Instagram
+
+---
+
+## 🧪 Pruebas
+
+### Crear Lead desde Instagram
+
+```bash
+curl -X POST http://localhost:3000/api/instagram/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "object": "instagram",
+    "entry": [{
+      "messaging": [{
+        "sender": {"id": "123"},
+        "message": {"text": "Hola, necesito info"}
+      }]
+    }]
+  }'
+```
+
+**Resultado esperado:**
+- Lead creado con `canal='instagram'`
+
+### Filtrar por Canal
+
+```bash
+# Obtener solo leads de Instagram
+curl http://localhost:3000/api/leads?canal=instagram
+
+# Obtener solo leads de WhatsApp
+curl http://localhost:3000/api/leads?canal=whatsapp
+
+# Obtener solo leads de Web
+curl http://localhost:3000/api/leads?canal=web
+```
+
+### Estadísticas por Canal
+
+```bash
+curl http://localhost:3000/api/leads/estadisticas
+```
+
+**Respuesta incluye:**
+```json
+{
+  "success": true,
+  "data": {
+    "total": 33,
+    "porEstado": {
+      "caliente": 10,
+      "tibio": 15,
+      "frio": 8
+    },
+    "porCanal": {
+      "web": 30,
+      "whatsapp": 2,
+      "instagram": 1
+    },
+    "contactados": 12,
+    "pendientes": 21
+  }
+}
+```
+
+---
+
+## 📈 Beneficios
+
+### Analítica:
+- ✅ Saber qué canal convierte mejor
+- ✅ Identificar canal más efectivo
+- ✅ Ajustar estrategias por canal
+
+### Operativo:
+- ✅ Filtrar leads por origen
+- ✅ Priorizar canales importantes
+- ✅ Reportes segmentados
+
+### Técnico:
+- ✅ Migración automática
+- ✅ Backwards compatible (leads existentes = 'web')
+- ✅ Extensible a nuevos canales
+
+---
+
+## 🔮 Extensibilidad
+
+Para agregar un nuevo canal en el futuro:
+
+### 1. Backend (Automático)
+```javascript
+// En la ruta del nuevo canal
+channel: 'telegram'  // ← Solo define el nombre
+```
+
+### 2. Dashboard
+```html
+<!-- Agregar opción al filtro -->
+<option value="telegram">✈️ Telegram</option>
+```
+
+```javascript
+// Agregar a formatCanal()
+const canales = {
+  ...
+  'telegram': '✈️ Telegram'
+};
+```
+
+### 3. Base de Datos
+✅ No requiere cambios (acepta cualquier string)
+
+---
+
+## 📊 Consultas SQL Útiles
+
+### Leads por Canal
+```sql
+SELECT canal, COUNT(*) as total 
+FROM leads 
+GROUP BY canal;
+```
+
+### Tasa de Conversión por Canal
+```sql
+SELECT 
+  canal,
+  COUNT(*) as total,
+  SUM(CASE WHEN contactado = 1 THEN 1 ELSE 0 END) as contactados,
+  ROUND(SUM(CASE WHEN contactado = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as tasa_conversion
+FROM leads
+GROUP BY canal;
+```
+
+### Leads Calientes por Canal
+```sql
+SELECT canal, COUNT(*) as calientes
+FROM leads
+WHERE estado = 'caliente'
+GROUP BY canal;
+```
+
+### Últimos 10 Leads de Instagram
+```sql
+SELECT nombre, telefono, servicio, fecha_creacion
+FROM leads
+WHERE canal = 'instagram'
+ORDER BY fecha_creacion DESC
+LIMIT 10;
+```
+
+---
+
+## ✅ Checklist de Implementación
+
+- [x] Campo `canal` agregado a tabla `leads`
+- [x] Migración automática implementada
+- [x] Índice `idx_leads_canal` creado
+- [x] Entidad `Lead` actualizada
+- [x] Repository actualizado (save, findAll, rowToLead)
+- [x] Estadísticas incluyen `porCanal`
+- [x] ProcessChatMessage asigna canal
+- [x] API acepta filtro por canal
+- [x] API retorna canal en respuestas
+- [x] Dashboard incluye filtro de canal
+- [x] Dashboard incluye columna de canal
+- [x] Dashboard muestra íconos por canal
+- [x] Sin errores de lint
+- [x] Migración ejecutada exitosamente
+- [x] Documentación completa
+
+---
+
+## 🎉 Estado Final
+
+**✅ COMPLETAMENTE FUNCIONAL**
+
+El sistema ahora:
+- 📊 Rastrea el canal de origen de cada lead
+- 🔍 Permite filtrar leads por canal
+- 📈 Proporciona estadísticas por canal
+- 🎨 Visualiza el canal en el dashboard
+- 🔄 Migra automáticamente datos existentes
+- 🚀 Está listo para nuevos canales
+
+---
+
+## 📚 Archivos Relacionados
+
+- `INSTAGRAM-INTEGRACION.md` - Integración de Instagram
+- `OPTIMIZACION-CANALES-MENSAJERIA.md` - Optimización de mensajes
+- `RESUMEN-INSTAGRAM.md` - Resumen de Instagram
+- `RESUMEN-OPTIMIZACION-CANALES.md` - Resumen de optimización
+
+---
+
+**Implementado:** Enero 2026  
+**Migración:** Automática  
+**Backwards Compatible:** ✅  
+**Leads migrados:** 33 → canal='web'
+

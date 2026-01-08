@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Comercial - Simulador de Clientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+
+        .sidebar h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .scenario {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .scenario:hover {
+            transform: translateX(5px);
+            border-color: #667eea;
+        }
+
+        .scenario.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .scenario-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .tag-caliente {
+            background: #ff4757;
+            color: white;
+        }
+
+        .tag-tibio {
+            background: #ffa502;
+            color: white;
+        }
+
+        .tag-frio {
+            background: #70a1ff;
+            color: white;
+        }
+
+        .chat-area {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .chat-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .chat-header h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 15px;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-controls {
+            padding: 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #2ed573;
+            color: white;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Modo Demo - Simulador de Clientes</h1>
+            <p>Selecciona un escenario y observa cómo el asistente maneja diferentes tipos de clientes</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h2>Escenarios de Demo</h2>
+                
+                <div class="scenario" data-scenario="urgente">
+                    <div class="scenario-title">🔥 Cliente Urgente</div>
+                    <div class="scenario-desc">Necesita servicio hoy, alta probabilidad de cierre</div>
+                    <span class="scenario-tag tag-caliente">CALIENTE</span>
+                </div>
+
+                <div class="scenario" data-scenario="corporativo">
+                    <div class="scenario-title">🏢 Cliente Corporativo</div>
+                    <div class="scenario-desc">Empresa con múltiples equipos, contrato recurrente</div>
+                    <span class="scenario-tag tag-caliente">CALIENTE</span>
+                </div>
+
+                <div class="scenario" data-scenario="referido">
+                    <div class="scenario-title">👥 Cliente Referido</div>
+                    <div class="scenario-desc">Viene recomendado, alta confianza</div>
+                    <span class="scenario-tag tag-caliente">CALIENTE</span>
+                </div>
+
+                <div class="scenario" data-scenario="cotizacion">
+                    <div class="scenario-title">💰 Solicita Cotización</div>
+                    <div class="scenario-desc">Comparando precios, necesita seguimiento</div>
+                    <span class="scenario-tag tag-tibio">TIBIO</span>
+                </div>
+
+                <div class="scenario" data-scenario="mantenimiento">
+                    <div class="scenario-title">🔧 Mantenimiento Preventivo</div>
+                    <div class="scenario-desc">Consulta sobre servicio regular</div>
+                    <span class="scenario-tag tag-tibio">TIBIO</span>
+                </div>
+
+                <div class="scenario" data-scenario="consulta">
+                    <div class="scenario-title">❓ Consulta General</div>
+                    <div class="scenario-desc">Solo pregunta, sin compromiso inmediato</div>
+                    <span class="scenario-tag tag-frio">FRÍO</span>
+                </div>
+
+                <div class="stats">
+                    <h3>📊 Estadísticas</h3>
+                    <div class="stat-item">
+                        <strong>Conversaciones simuladas:</strong> <span id="stat-total">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Leads capturados:</strong> <span id="stat-leads">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Tasa de conversión:</strong> <span id="stat-conversion">0%</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="window.open('/dashboard', '_blank')">
+                    📊 Ver Dashboard
+                </button>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h3 id="chat-title">Selecciona un escenario para comenzar</h3>
+                    <p id="chat-subtitle">Los mensajes se simularán automáticamente</p>
+                </div>
+
+                <div class="chat-messages" id="messages">
+                    <div class="loading">
+                        👆 Selecciona un escenario de la izquierda para ver la simulación
+                    </div>
+                </div>
+
+                <div class="chat-controls">
+                    <button class="btn btn-primary" id="btn-start" onclick="startSimulation()" disabled>
+                        ▶️ Iniciar Simulación
+                    </button>
+                    <button class="btn btn-secondary" id="btn-reset" onclick="resetChat()">
+                        🔄 Reiniciar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/demo.js"></script>
+</body>
+</html>
+
