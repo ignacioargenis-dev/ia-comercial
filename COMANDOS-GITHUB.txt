@@ -1,0 +1,38 @@
+═══════════════════════════════════════════════════════════════
+📤 COMANDOS PARA SUBIR A GITHUB - COPIA Y PEGA
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Crear repositorio en GitHub
+────────────────────────────────────
+1. Ve a: https://github.com/new
+2. Nombre: ia-comercial
+3. Visibilidad: Private (recomendado)
+4. NO marcar ninguna opción de inicialización
+5. Click "Create repository"
+
+
+PASO 2: Ejecutar estos comandos (PowerShell/CMD)
+────────────────────────────────────
+# IMPORTANTE: Reemplaza TU_USUARIO con tu nombre de usuario de GitHub
+
+git remote add origin https://github.com/TU_USUARIO/ia-comercial.git
+git branch -M main
+git push -u origin main
+
+
+PASO 3: Verificar
+────────────────────────────────────
+Recarga la página de tu repositorio en GitHub y verifica que:
+✅ Todos los archivos aparecen
+✅ .env NO aparece (está protegido)
+✅ README.md se muestra en la página principal
+
+
+═══════════════════════════════════════════════════════════════
+🎉 ¡Tu sistema estará en GitHub!
+═══════════════════════════════════════════════════════════════
+
+Repositorio local:    ✅ Listo (commit da8a583)
+Archivos protegidos:  ✅ .env, *.db, logs/
+Documentación:        ✅ README.md y 60+ guías
+
