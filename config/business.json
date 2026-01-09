@@ -1,143 +1,139 @@
 {
   "business": {
-    "name": "Climatización Express",
-    "shortName": "Climatización",
-    "industry": "Servicios de climatización",
-    "description": "Empresa especializada en instalación, mantenimiento y reparación de sistemas de aire acondicionado",
+    "name": "SendSpress",
+    "shortName": "SendSpress",
+    "industry": "Automatización comercial con Inteligencia Artificial",
+    "description": "Asistente comercial omnicanal que automatiza la atención al cliente por Instagram, WhatsApp y sitio web. Filtra prospectos reales y aumenta conversiones.",
     "phone": "+56912345678",
-    "email": "contacto@climatizacion.cl",
-    "website": "https://www.climatizacion.cl"
+    "email": "contacto@sendspress.cl",
+    "website": "https://www.sendspress.cl"
   },
   "services": [
     {
-      "id": "instalacion",
-      "name": "Instalación de Aire Acondicionado",
-      "description": "Instalación profesional de equipos residenciales y comerciales",
-      "estimatedTime": "1-2 días",
-      "requiresVisit": true
+      "id": "automatizacion-completa",
+      "name": "Automatización Completa Omnicanal",
+      "description": "Implementación completa del asistente IA en Instagram, WhatsApp y sitio web",
+      "estimatedTime": "7 días hábiles",
+      "requiresVisit": false
     },
     {
-      "id": "mantenimiento",
-      "name": "Mantenimiento Preventivo",
-      "description": "Limpieza, revisión y ajuste de equipos",
+      "id": "demo-personalizada",
+      "name": "Demo Personalizada Gratuita",
+      "description": "Demostración personalizada del funcionamiento del asistente IA",
+      "estimatedTime": "30-45 minutos",
+      "requiresVisit": false
+    },
+    {
+      "id": "consultoria-implementacion",
+      "name": "Consultoría de Implementación",
+      "description": "Asesoría especializada para integrar la IA en tu flujo de ventas",
       "estimatedTime": "2-3 horas",
-      "requiresVisit": true
+      "requiresVisit": false
     },
     {
-      "id": "reparacion",
-      "name": "Reparación",
-      "description": "Diagnóstico y reparación de fallas en equipos",
-      "estimatedTime": "Según diagnóstico",
-      "requiresVisit": true
+      "id": "automatizacion-instagram",
+      "name": "Automatización Instagram",
+      "description": "Implementación del asistente IA solo en Instagram Direct",
+      "estimatedTime": "3-5 días",
+      "requiresVisit": false
     },
     {
-      "id": "limpieza",
-      "name": "Limpieza Profunda",
-      "description": "Limpieza completa de filtros y componentes internos",
-      "estimatedTime": "1-2 horas",
-      "requiresVisit": true
+      "id": "automatizacion-whatsapp",
+      "name": "Automatización WhatsApp",
+      "description": "Implementación del asistente IA solo en WhatsApp Business",
+      "estimatedTime": "3-5 días",
+      "requiresVisit": false
     },
     {
-      "id": "cotizacion",
-      "name": "Cotización",
-      "description": "Evaluación y presupuesto sin compromiso",
-      "estimatedTime": "Inmediato",
+      "id": "automatizacion-web",
+      "name": "Automatización Sitio Web",
+      "description": "Implementación del chat IA en tu sitio web",
+      "estimatedTime": "2-3 días",
       "requiresVisit": false
     }
   ],
   "coverage": {
-    "regions": ["Región Metropolitana"],
-    "communes": [
-      "Santiago",
-      "Providencia",
-      "Las Condes",
-      "Vitacura",
-      "Lo Barnechea",
-      "La Reina",
-      "Ñuñoa",
-      "Macul",
-      "Peñalolén",
-      "La Florida",
-      "San Miguel",
-      "Maipú",
-      "Pudahuel",
-      "Cerrillos",
-      "Estación Central"
-    ],
+    "regions": ["Todo Chile"],
+    "communes": ["Cobertura nacional"],
     "additionalFees": {
-      "enabled": true,
-      "message": "Comunas fuera de cobertura pueden tener recargo por traslado"
+      "enabled": false,
+      "message": "Servicio completamente digital sin costos adicionales por ubicación"
     }
   },
   "schedule": {
     "timezone": "America/Santiago",
     "workingDays": {
-      "monday": { "enabled": true, "open": "08:00", "close": "18:00" },
-      "tuesday": { "enabled": true, "open": "08:00", "close": "18:00" },
-      "wednesday": { "enabled": true, "open": "08:00", "close": "18:00" },
-      "thursday": { "enabled": true, "open": "08:00", "close": "18:00" },
-      "friday": { "enabled": true, "open": "08:00", "close": "18:00" },
-      "saturday": { "enabled": true, "open": "09:00", "close": "14:00" },
-      "sunday": { "enabled": false, "open": null, "close": null }
+      "monday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "tuesday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "wednesday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "thursday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "friday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "saturday": { "enabled": true, "open": "00:00", "close": "23:59" },
+      "sunday": { "enabled": true, "open": "00:00", "close": "23:59" }
     },
     "emergencyService": {
       "enabled": true,
       "hours": "24/7",
-      "additionalFee": true
+      "additionalFee": false
     },
     "holidays": {
-      "attendHolidays": false,
-      "message": "No atendemos días festivos salvo emergencias"
+      "attendHolidays": true,
+      "message": "Atención 24/7 los 365 días del año"
     }
   },
   "pricing": {
-    "showPrices": false,
-    "requireQuote": true,
-    "message": "Los precios varían según el tipo de equipo y complejidad del trabajo",
+    "showPrices": true,
+    "requireQuote": false,
+    "message": "Precios transparentes y fijos",
+    "implementationFee": 1250000,
+    "monthlyFee": 120000,
     "paymentMethods": [
-      "Efectivo",
       "Transferencia bancaria",
       "Tarjetas de crédito/débito",
-      "Mercado Pago"
+      "Mercado Pago",
+      "PayPal"
     ]
   },
   "qualifications": {
     "certifications": [
-      "Certificación SEC (Superintendencia de Electricidad y Combustibles)",
-      "Técnicos especializados en marcas principales"
+      "Especialistas certificados en Inteligencia Artificial",
+      "Expertos en automatización de procesos comerciales",
+      "Certificaciones en desarrollo de software empresarial"
     ],
-    "experience": "15 años de experiencia en el mercado",
-    "warranty": "6 meses de garantía en todos los trabajos"
+    "experience": "5+ años desarrollando soluciones de IA para empresas",
+    "warranty": "Garantía de funcionamiento 99.9% uptime y soporte técnico incluido"
   },
   "conversationStyle": {
-    "tone": "profesional y cercano",
+    "tone": "persuasivo y entusiasta",
     "formality": "tú",
-    "personality": "Amigable, servicial y eficiente. Enfocado en entender la necesidad del cliente y ofrecer soluciones rápidas.",
+    "personality": "Super-vendedor apasionado por la transformación digital. Enfocado en resolver problemas de clientes, destacar beneficios cuantificables y concretar demos. Crea urgencia y confianza.",
     "guidelines": [
-      "Preguntar por nombre, teléfono y comuna",
-      "Clasificar la urgencia del servicio",
-      "Ofrecer alternativas si el servicio no está disponible",
-      "Ser proactivo en agendar visitas o cotizaciones",
-      "Confirmar datos antes de despedirse"
+      "Destacar beneficios: 'aumenta conversiones 300%', '24/7', 'no pierdes clientes'",
+      "Ofrecer demos gratuitas como primer paso",
+      "Preguntar por nombre, teléfono, rubro y urgencia",
+      "Crear sentido de urgencia con plazos de implementación (7 días)",
+      "Clasificar leads en frío/tibio/caliente según intención de compra",
+      "Usar lenguaje de transformación: 'revolucionar tus ventas', 'escalar tu negocio'",
+      "Confirmar datos y prometer contacto rápido de especialista humano"
     ]
   },
   "notifications": {
-    "ownerEmail": "propietario@climatizacion.cl",
+    "ownerEmail": "ventas@sendspress.cl",
     "ownerPhone": "+56987654321",
-    "notifyOn": ["caliente"],
-    "emailSubjectPrefix": "🔥 Lead Caliente -"
+    "notifyOn": ["caliente", "tibio"],
+    "emailSubjectPrefix": "🚀 Nuevo Lead SendSpress -"
   },
   "branding": {
-    "primaryColor": "#f5576c",
-    "secondaryColor": "#667eea",
+    "primaryColor": "#6366f1",
+    "secondaryColor": "#06b6d4",
     "logo": null,
-    "slogan": "Tu confort, nuestra prioridad"
+    "slogan": "Automatiza tus ventas, multiplica tus resultados"
   },
   "metadata": {
-    "version": "1.0",
+    "version": "2.0",
     "createdAt": "2026-01-07",
-    "lastUpdated": "2026-01-07",
-    "clientId": "climatizacion-express",
+    "lastUpdated": "2026-01-09",
+    "clientId": "sendspress",
     "instanceType": "production"
   }
 }
