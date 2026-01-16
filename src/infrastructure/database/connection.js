@@ -167,6 +167,23 @@ class DatabaseConnection {
         console.log('   ✅ Columna instagram_id agregada para enlaces directos a conversaciones');
       }
 
+      // Migración para tabla conversaciones - agregar campo completed
+      const conversacionesExists = this.db.prepare(`
+        SELECT name FROM sqlite_master 
+        WHERE type='table' AND name='conversaciones'
+      `).get();
+
+      if (conversacionesExists) {
+        const conversacionesColumns = this.db.prepare("PRAGMA table_info(conversaciones)").all();
+        const hasCompleted = conversacionesColumns.some(col => col.name === 'completed');
+
+        if (!hasCompleted) {
+          console.log('⚙️  Migrando BD: Agregando columna completed a conversaciones');
+          this.db.exec(`ALTER TABLE conversaciones ADD COLUMN completed INTEGER DEFAULT 0`);
+          console.log('   ✅ Columna completed agregada para control de cierre de conversaciones');
+        }
+      }
+
       if (!hasUltimaInteraccion || !hasFechaContacto || !hasCanal) {
         console.log('✅ Migración de BD completada');
       }

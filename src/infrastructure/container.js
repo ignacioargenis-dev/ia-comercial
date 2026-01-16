@@ -13,6 +13,7 @@ const dbConnection = require('./database/connection');
 // Repositorios
 const SqliteLeadRepository = require('./database/sqlite/SqliteLeadRepository');
 const SqliteConversationRepository = require('./database/sqlite/SqliteConversationRepository');
+const SqliteCommercialStrategyRepository = require('./database/sqlite/SqliteCommercialStrategyRepository');
 
 // Servicios de infraestructura
 const OpenAIClient = require('./external/OpenAIClient');
@@ -78,6 +79,17 @@ class Container {
       this.instances.conversationRepository = new SqliteConversationRepository(this.getDatabase());
     }
     return this.instances.conversationRepository;
+  }
+
+  /**
+   * Obtener repositorio de Commercial Strategy
+   * @returns {SqliteCommercialStrategyRepository}
+   */
+  getCommercialStrategyRepository() {
+    if (!this.instances.commercialStrategyRepository) {
+      this.instances.commercialStrategyRepository = new SqliteCommercialStrategyRepository(this.getDatabase());
+    }
+    return this.instances.commercialStrategyRepository;
   }
 
   /**

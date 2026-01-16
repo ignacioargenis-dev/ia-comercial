@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 class EmailNotificationService {
   constructor() {
     this.transporter = null;
+    this.sendGridTransporter = null;
     this.isConfigured = false;
     this.initialize();
   }
@@ -20,37 +21,52 @@ class EmailNotificationService {
     try {
       // Verificar que las variables de entorno estén configuradas
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.warn('⚠️  Email no configurado - Variables EMAIL_USER y EMAIL_PASS faltantes en .env');
+        console.warn('⚠️  Email primario no configurado - Variables EMAIL_USER y EMAIL_PASS faltantes en .env');
         this.isConfigured = false;
-        return;
+      } else {
+        // Configurar transporter primario según el servicio
+        const emailService = process.env.EMAIL_SERVICE || 'gmail';
+
+        if (emailService === 'gmail') {
+          this.transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS // App Password de Gmail
+            }
+          });
+        } else if (emailService === 'smtp') {
+          // Configuración SMTP genérica
+          this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT || 587,
+            secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS
+            }
+          });
+        }
+
+        this.isConfigured = true;
+        console.log('✅ Servicio de email primario inicializado correctamente');
       }
 
-      // Configurar transporter según el servicio
-      const emailService = process.env.EMAIL_SERVICE || 'gmail';
-      
-      if (emailService === 'gmail') {
-        this.transporter = nodemailer.createTransport({
-          service: 'gmail',
+      // Configurar SendGrid como respaldo (opcional)
+      if (process.env.SENDGRID_API_KEY) {
+        this.sendGridTransporter = nodemailer.createTransport({
+          host: 'smtp.sendgrid.net',
+          port: 587,
+          secure: false,
           auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS // App Password de Gmail
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY
           }
         });
-      } else if (emailService === 'smtp') {
-        // Configuración SMTP genérica
-        this.transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT || 587,
-          secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-          }
-        });
+        console.log('✅ Servicio de email respaldo (SendGrid) inicializado');
+      } else {
+        console.log('ℹ️  SendGrid no configurado - Solo respaldo a consola disponible');
       }
-
-      this.isConfigured = true;
-      console.log('✅ Servicio de email inicializado correctamente');
 
     } catch (error) {
       console.error('❌ Error al inicializar servicio de email:', error.message);
@@ -71,34 +87,23 @@ class EmailNotificationService {
       return true;
     }
 
-    try {
-      const emailContent = this.buildHotLeadEmail(leadData);
-      
-      // Personalizar asunto según el canal
-      const canalTexto = this.getCanalTexto(leadData.canal);
-      const asunto = `🔥 Lead caliente desde ${canalTexto} - ${leadData.nombre || 'Sin nombre'}`;
-      
-      const mailOptions = {
-        from: `"${process.env.BUSINESS_NAME || 'Sistema IA'}" <${process.env.EMAIL_USER}>`,
-        to: process.env.OWNER_EMAIL || process.env.EMAIL_USER,
-        subject: asunto,
-        html: emailContent,
-        text: this.buildPlainTextEmail(leadData) // Fallback texto plano
-      };
+    // Intentar primero con el método configurado
+    const exitoPrimario = await this.enviarConMetodoPrimario(leadData, 'CALIENTE');
 
-      const info = await this.transporter.sendMail(mailOptions);
-      
-      console.log('✅ Email enviado correctamente:', info.messageId);
-      this.logToConsole('CALIENTE', leadData);
-      
+    if (exitoPrimario) {
       return true;
-
-    } catch (error) {
-      console.error('❌ Error al enviar email:', error.message);
-      // Fallback a consola
-      this.logToConsole('CALIENTE', leadData);
-      return false;
     }
+
+    // Si falla y tenemos SendGrid configurado, intentar con SendGrid
+    if (process.env.SENDGRID_API_KEY) {
+      console.log('🔄 Intentando fallback con SendGrid...');
+      return await this.enviarConSendGrid(leadData, 'CALIENTE');
+    }
+
+    // Si no hay fallback, mostrar en consola
+    console.log('📧 Fallback no disponible - Notificación solo en consola');
+    this.logToConsole('CALIENTE', leadData);
+    return false;
   }
 
   /**
@@ -120,32 +125,23 @@ class EmailNotificationService {
       return true;
     }
 
-    try {
-      const emailContent = this.buildWarmLeadEmail(leadData);
-      
-      // Personalizar asunto según el canal
-      const canalTexto = this.getCanalTexto(leadData.canal);
-      const asunto = `🌡️ Lead Tibio desde ${canalTexto} - ${leadData.nombre}`;
-      
-      const mailOptions = {
-        from: `"${process.env.BUSINESS_NAME || 'Sistema IA'}" <${process.env.EMAIL_USER}>`,
-        to: process.env.OWNER_EMAIL || process.env.EMAIL_USER,
-        subject: asunto,
-        html: emailContent,
-        text: this.buildPlainTextEmail(leadData)
-      };
+    // Intentar primero con el método configurado
+    const exitoPrimario = await this.enviarConMetodoPrimario(leadData, 'TIBIO');
 
-      await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de lead tibio enviado');
-      this.logToConsole('TIBIO', leadData);
-      
+    if (exitoPrimario) {
       return true;
-
-    } catch (error) {
-      console.error('❌ Error al enviar email de lead tibio:', error.message);
-      this.logToConsole('TIBIO', leadData);
-      return false;
     }
+
+    // Si falla y tenemos SendGrid configurado, intentar con SendGrid
+    if (process.env.SENDGRID_API_KEY) {
+      console.log('🔄 Intentando fallback con SendGrid para lead tibio...');
+      return await this.enviarConSendGrid(leadData, 'TIBIO');
+    }
+
+    // Si no hay fallback, mostrar en consola
+    console.log('📧 Fallback no disponible - Notificación solo en consola');
+    this.logToConsole('TIBIO', leadData);
+    return false;
   }
 
   /**
@@ -158,6 +154,78 @@ class EmailNotificationService {
     // Los leads fríos no generan emails, solo log
     this.logToConsole('FRIO', leadData);
     return true;
+  }
+
+  /**
+   * Enviar email con método primario configurado
+   * @private
+   */
+  async enviarConMetodoPrimario(leadData, tipo) {
+    if (!this.transporter) return false;
+
+    try {
+      const emailContent = tipo === 'CALIENTE' ? this.buildHotLeadEmail(leadData) : this.buildWarmLeadEmail(leadData);
+      const canalTexto = this.getCanalTexto(leadData.canal);
+      const asunto = tipo === 'CALIENTE'
+        ? `🔥 Lead caliente desde ${canalTexto} - ${leadData.nombre || 'Sin nombre'}`
+        : `🌡️ Lead tibio desde ${canalTexto} - ${leadData.nombre}`;
+
+      const mailOptions = {
+        from: `"${process.env.BUSINESS_NAME || 'Sistema IA'}" <${process.env.EMAIL_USER}>`,
+        to: process.env.OWNER_EMAIL || process.env.EMAIL_USER,
+        subject: asunto,
+        html: emailContent,
+        text: this.buildPlainTextEmail(leadData)
+      };
+
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email enviado correctamente con método primario:', info.messageId);
+      this.logToConsole(tipo, leadData);
+      return true;
+
+    } catch (error) {
+      // Si es timeout, probablemente es bloqueo de Gmail
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
+        console.log('⏰ Timeout en método primario - Probablemente bloqueo de proveedor');
+      } else {
+        console.error('❌ Error en método primario:', error.message);
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Enviar email con SendGrid como respaldo
+   * @private
+   */
+  async enviarConSendGrid(leadData, tipo) {
+    if (!this.sendGridTransporter) return false;
+
+    try {
+      const emailContent = tipo === 'CALIENTE' ? this.buildHotLeadEmail(leadData) : this.buildWarmLeadEmail(leadData);
+      const canalTexto = this.getCanalTexto(leadData.canal);
+      const asunto = tipo === 'CALIENTE'
+        ? `🔥 Lead caliente desde ${canalTexto} - ${leadData.nombre || 'Sin nombre'} (Respaldo)`
+        : `🌡️ Lead tibio desde ${canalTexto} - ${leadData.nombre} (Respaldo)`;
+
+      const mailOptions = {
+        from: `"${process.env.BUSINESS_NAME || 'Sistema IA'}" <${process.env.EMAIL_USER || 'sistema@sendspress.cl'}>`,
+        to: process.env.OWNER_EMAIL || process.env.EMAIL_USER,
+        subject: asunto,
+        html: emailContent,
+        text: this.buildPlainTextEmail(leadData)
+      };
+
+      const info = await this.sendGridTransporter.sendMail(mailOptions);
+      console.log('✅ Email enviado correctamente con SendGrid:', info.messageId);
+      this.logToConsole(tipo, leadData);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Error en SendGrid:', error.message);
+      this.logToConsole(tipo, leadData);
+      return false;
+    }
   }
 
   /**

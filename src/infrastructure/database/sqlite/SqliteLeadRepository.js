@@ -37,6 +37,49 @@ class SqliteLeadRepository {
   }
 
   /**
+   * Actualizar un lead existente
+   * @param {Lead} lead - Lead con los datos actualizados
+   * @returns {Lead} Lead actualizado
+   */
+  update(lead) {
+    const stmt = this.db.prepare(`
+      UPDATE leads 
+      SET nombre = ?,
+          telefono = ?,
+          servicio = ?,
+          comuna = ?,
+          urgencia = ?,
+          estado = ?,
+          contactado = ?,
+          notas = ?,
+          canal = ?,
+          instagram_id = ?,
+          fecha_actualizacion = datetime('now')
+      WHERE id = ?
+    `);
+
+    const result = stmt.run(
+      lead.nombre,
+      lead.telefono,
+      lead.servicio,
+      lead.comuna,
+      lead.urgencia,
+      lead.estado,
+      lead.contactado ? 1 : 0,
+      lead.notas,
+      lead.canal || 'web',
+      lead.instagram_id || null,
+      lead.id
+    );
+
+    if (result.changes === 0) {
+      throw new Error(`No se pudo actualizar el lead con ID ${lead.id}`);
+    }
+
+    return lead;
+  }
+
+  /**
    * Buscar lead por ID
    */
   findById(id) {

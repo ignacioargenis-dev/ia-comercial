@@ -24,6 +24,7 @@ const followupsRoutes = require('./src/infrastructure/http/routes/followups');
 const healthRoutes = require('./src/infrastructure/http/routes/health');
 const systemRoutes = require('./src/infrastructure/http/routes/system'); // Rutas de configuración del sistema
 const simulateRoutes = require('./src/infrastructure/http/routes/simulate'); // Rutas de simulación para demos
+const commercialStrategyRoutes = require('./src/infrastructure/http/routes/commercial-strategy'); // Estrategia comercial IA
 
 // Importar contenedor para seguimientos automáticos
 const container = require('./src/infrastructure/container');
@@ -49,6 +50,7 @@ app.use('/api/instagram', instagramRoutes);
 app.use('/api/followups', followupsRoutes);
 app.use('/api/system', systemRoutes); // Configuración del sistema
 app.use('/api/simulate', simulateRoutes); // Simulación para demos
+app.use('/api/commercial-strategy', commercialStrategyRoutes); // Estrategia comercial IA
 
 // Health checks (sin /api para load balancers)
 app.use('/health', healthRoutes);
@@ -64,6 +66,10 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/demo', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'demo.html'));
+});
+
+app.get('/estrategia-comercial', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'estrategia-comercial.html'));
 });
 
 // Manejo de errores 404 (debe ir después de todas las rutas)

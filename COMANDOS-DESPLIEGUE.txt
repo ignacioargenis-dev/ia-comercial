@@ -1,0 +1,74 @@
+# 🚀 Comandos para Despliegue - Ejecutar en Orden
+
+## PASO 1: Obtener IP del Droplet
+# En DigitalOcean: Panel → Droplets → Copia la IP
+# Ejemplo: 165.227.123.45
+
+## PASO 2: Conectar por SSH (desde tu PowerShell)
+ssh root@TU_IP_AQUI
+
+## PASO 3: Actualizar sistema (en el servidor)
+apt update && apt upgrade -y
+
+## PASO 4: Instalar Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt install -y nodejs
+node --version
+npm --version
+
+## PASO 5: Instalar Git, PM2, Nginx, Certbot
+apt install -y git nginx certbot python3-certbot-nginx
+npm install -g pm2
+systemctl enable nginx
+
+## PASO 6: Clonar repositorio
+mkdir -p /var/www
+cd /var/www
+git clone https://github.com/ignacioargenis-dev/ia-comercial.git
+cd ia-comercial
+
+## PASO 7: Instalar dependencias
+npm install --production
+
+## PASO 8: Crear .env
+cp .env.example .env
+nano .env
+# Configurar todas las variables y guardar (Ctrl+X, Y, Enter)
+chmod 600 .env
+
+## PASO 9: Crear directorios
+mkdir -p logs db
+
+## PASO 10: Iniciar con PM2
+pm2 start server.js --name ia-comercial
+pm2 save
+pm2 startup systemd
+# Ejecutar el comando que PM2 muestra
+
+## PASO 11: Configurar Nginx
+nano /etc/nginx/sites-available/ia-comercial
+# Pegar configuración (se proporcionará)
+
+ln -s /etc/nginx/sites-available/ia-comercial /etc/nginx/sites-enabled/
+rm /etc/nginx/sites-enabled/default
+nginx -t
+systemctl restart nginx
+
+## PASO 12: Configurar DNS
+# Ir a tu proveedor de dominio
+# Agregar registro A: @ → TU_IP
+# Agregar registro A: www → TU_IP
+
+## PASO 13: Instalar SSL (después de DNS)
+certbot --nginx -d tudominio.com -d www.tudominio.com --email tu-email@gmail.com --agree-tos --no-eff-email
+
+## PASO 14: Configurar Firewall
+ufw allow OpenSSH
+ufw allow 'Nginx Full'
+ufw enable
+
+## ✅ VERIFICAR
+pm2 status
+pm2 logs ia-comercial
+curl https://tudominio.com/health/detailed
+

@@ -862,26 +862,27 @@
         /**
          * Formatear canal como enlace clickeable (para Instagram)
          */
-        function formatCanalLink(lead) {
-            const canal = lead.canal || 'web';
-            
-            // Si es Instagram y tiene instagram_id, crear enlace clickeable
-            if (canal === 'instagram' && lead.instagram_id) {
-                // URL directa a la conversación de Instagram
-                const instagramUrl = `https://www.instagram.com/direct/t/${lead.instagram_id}`;
-                return `<a href="${instagramUrl}" target="_blank" class="instagram-link" title="Abrir conversación en Instagram">
-                    📸 Instagram
-                </a>`;
-            }
-            
-            // Si es WhatsApp, mostrar con ícono
-            if (canal === 'whatsapp') {
-                return '💚 WhatsApp';
-            }
-            
-            // Para Web u otros canales
-            return formatCanal(canal);
+    function formatCanalLink(lead) {
+        const canal = lead.canal || 'web';
+        
+        // Si es Instagram y tiene instagram_id, crear enlace clickeable
+        if (canal === 'instagram' && lead.instagram_id) {
+            // URL al inbox de Instagram (Meta no proporciona thread_id en el webhook)
+            const instagramUrl = `https://www.instagram.com/direct/inbox/`;
+            return `<a href="${instagramUrl}" target="_blank" class="instagram-link" title="Abrir Instagram Direct (busca al usuario: ${lead.nombre || lead.instagram_id})">
+                📸 Instagram
+            </a>
+            <small style="display:block; color:#999; font-size:11px;">ID: ${lead.instagram_id.substring(0, 12)}...</small>`;
         }
+        
+        // Si es WhatsApp, mostrar con ícono
+        if (canal === 'whatsapp') {
+            return '💚 WhatsApp';
+        }
+        
+        // Para Web u otros canales
+        return formatCanal(canal);
+    }
 
         /**
          * Formatear teléfono como enlace de WhatsApp

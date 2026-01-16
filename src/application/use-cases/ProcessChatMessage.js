@@ -44,13 +44,36 @@ class ProcessChatMessage {
       let conversation = this.conversationRepository.findBySessionId(sessionId);
       let conversationHistory = conversation?.historial || [];
       
-      // 2. Agregar mensaje del usuario al historial
+      // 2. VERIFICAR SI LA CONVERSACIÓN YA ESTÁ COMPLETADA
+      if (conversation && conversation.completed === 1) {
+        console.log(`ℹ️  Conversación completada - Enviando mensaje de cierre automático`);
+        
+        // Devolver mensaje de cierre sin llamar a OpenAI
+        const leadInstance = conversation.lead_id 
+          ? this.leadRepository.findById(conversation.lead_id)
+          : null;
+
+        return {
+          success: true,
+          reply: "Tu solicitud ya fue procesada exitosamente. Un asesor te contactará pronto para continuar. ¡Muchas gracias! 👋",
+          lead: leadInstance,
+          leadGuardado: false,
+          conversacionCompleta: true,
+          clasificacion: {
+            estado: leadInstance?.estado || 'caliente',
+            razon: 'Conversación ya completada',
+            corregidoPorReglas: false
+          }
+        };
+      }
+      
+      // 3. Agregar mensaje del usuario al historial
       conversationHistory.push({
         role: 'user',
         content: message
       });
 
-      // 3. Generar respuesta con IA (retorna LLMResponse con Lead estructurado)
+      // 4. Generar respuesta con IA (retorna LLMResponse con Lead estructurado)
       const llmResponse = await this.chatService.generateResponse(conversationHistory, channel);
       const leadInstance = llmResponse.getLead();
 
@@ -93,49 +116,70 @@ class ProcessChatMessage {
       let savedLead = null;
       let notificationResult = null;
 
-      if (finalLead.estaCompleto() && (!conversation || !conversation.lead_id)) {
-        // Asignar canal al lead antes de guardar
-        finalLead.canal = channel;
-        
-        // Si es Instagram, guardar el senderId para acceso directo a la conversación
-        if (channel === 'instagram' && metadata?.senderId) {
-          finalLead.instagram_id = metadata.senderId;
-        }
-        
-        // Guardar el lead en el repositorio
-        savedLead = this.leadRepository.save(finalLead);
-        
-        // Asociar conversación con lead
-        this.conversationRepository.associateWithLead(sessionId, savedLead.id);
-        
-        // Actualizar última interacción (para seguimiento automático)
-        this.leadRepository.updateLastInteraction(savedLead.id);
-        
-        const reason = LeadClassifier.getClassificationReason(savedLead, conversationHistory);
-        console.log(`✅ Lead guardado: ${savedLead.toString()}`);
-        console.log(`   Clasificado como: ${savedLead.estado} (${reason})`);
-
-        // 8. DISPARAR NOTIFICACIÓN AUTOMÁTICAMENTE SI ES CALIENTE
-        if (savedLead.esCaliente()) {
-          console.log(`🔥 Lead caliente detectado - Disparando notificación automática...`);
-          notificationResult = await this.notifyOwner.execute({
-            lead: savedLead,
-            reason: `Lead caliente: ${reason}`,
-            priority: 'urgent'
-          });
-        } else if (savedLead.esTibio()) {
-          // También notificar tibios, pero con menor prioridad
-          notificationResult = await this.notifyOwner.execute({
-            lead: savedLead,
-            reason: `Lead tibio: ${reason}`,
-            priority: 'normal'
-          });
-        }
-      } else if (finalLead.estaCompleto()) {
-        console.log(`ℹ️  Lead ya existente - ${finalLead.toString()}`);
-        // Si el lead ya existe, actualizar su última interacción
+      if (finalLead.estaCompleto()) {
+        // Verificar si ya existe un lead asociado a esta conversación
         if (conversation && conversation.lead_id) {
-          this.leadRepository.updateLastInteraction(conversation.lead_id);
+          // Lead ya existe, actualizar sus datos con la información nueva
+          const existingLead = this.leadRepository.findById(conversation.lead_id);
+          if (existingLead) {
+            // Actualizar datos del lead existente con los nuevos datos
+            existingLead.actualizar({
+              nombre: finalLead.nombre,
+              telefono: finalLead.telefono,
+              servicio: finalLead.servicio,
+              comuna: finalLead.comuna,
+              urgencia: finalLead.urgencia,
+              estado: finalLead.estado,
+              notas: finalLead.notas
+            });
+            this.leadRepository.update(existingLead);
+            this.leadRepository.updateLastInteraction(conversation.lead_id);
+            console.log(`ℹ️  Lead actualizado (ID: ${conversation.lead_id}) - ${existingLead.toString()}`);
+            savedLead = existingLead; // Para que se pueda acceder en la respuesta
+          }
+        } else {
+          // No existe lead, crear uno nuevo
+          // Asignar canal al lead antes de guardar
+          finalLead.canal = channel;
+          
+          // Si es Instagram, guardar el senderId para acceso directo a la conversación
+          if (channel === 'instagram' && metadata?.senderId) {
+            finalLead.instagram_id = metadata.senderId;
+          }
+          
+          // Guardar el lead en el repositorio
+          savedLead = this.leadRepository.save(finalLead);
+          
+          // Asociar conversación con lead INMEDIATAMENTE
+          this.conversationRepository.associateWithLead(sessionId, savedLead.id);
+          
+          // MARCAR CONVERSACIÓN COMO COMPLETADA (evita respuestas innecesarias)
+          this.conversationRepository.markAsCompleted(sessionId);
+          console.log(`✅ Conversación marcada como completada - No se responderán más mensajes`);
+          
+          // Actualizar última interacción (para seguimiento automático)
+          this.leadRepository.updateLastInteraction(savedLead.id);
+          
+          const reason = LeadClassifier.getClassificationReason(savedLead, conversationHistory);
+          console.log(`✅ Lead guardado: ${savedLead.toString()}`);
+          console.log(`   Clasificado como: ${savedLead.estado} (${reason})`);
+
+          // 8. DISPARAR NOTIFICACIÓN AUTOMÁTICAMENTE SI ES CALIENTE
+          if (savedLead.esCaliente()) {
+            console.log(`🔥 Lead caliente detectado - Disparando notificación automática...`);
+            notificationResult = await this.notifyOwner.execute({
+              lead: savedLead,
+              reason: `Lead caliente: ${reason}`,
+              priority: 'urgent'
+            });
+          } else if (savedLead.esTibio()) {
+            // También notificar tibios, pero con menor prioridad
+            notificationResult = await this.notifyOwner.execute({
+              lead: savedLead,
+              reason: `Lead tibio: ${reason}`,
+              priority: 'normal'
+            });
+          }
         }
       } else {
         console.log(`ℹ️  Lead incompleto, continuando conversación - ${finalLead.toString()}`);

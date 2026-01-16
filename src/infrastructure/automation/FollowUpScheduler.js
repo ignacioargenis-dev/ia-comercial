@@ -160,8 +160,8 @@ class FollowUpScheduler {
       console.log(`   Tibios: ${stats.porEstado?.tibio || 0}`);
       console.log(`   Pendientes de seguimiento: ${stats.pendingFollowUp || 0}`);
 
-      // Aquí podrías enviar el reporte por email al propietario
-      // await this.followUpService.sendDailyReport(stats);
+      // Enviar reporte por email al propietario
+      await this.followUpService.sendDailyReport(stats);
 
     } catch (error) {
       console.error('❌ Error en sendDailyReport:', error);

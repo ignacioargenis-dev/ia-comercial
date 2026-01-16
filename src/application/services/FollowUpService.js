@@ -247,6 +247,173 @@ class FollowUpService {
 
     return await this.sendFollowUp(lead, lead.estado);
   }
+
+  /**
+   * Enviar reporte diario al propietario
+   * @param {Object} stats - Estadísticas del sistema
+   * @returns {Promise<boolean>}
+   */
+  async sendDailyReport(stats) {
+    try {
+      console.log('📊 Enviando reporte diario...');
+
+      // Verificar que Resend esté configurado
+      if (!process.env.RESEND_API_KEY) {
+        console.log('⚠️  RESEND_API_KEY no configurado, saltando reporte diario');
+        return false;
+      }
+
+      if (!process.env.EMAIL_TO && !process.env.OWNER_EMAIL) {
+        console.log('⚠️  EMAIL_TO no configurado, saltando reporte diario');
+        return false;
+      }
+
+      const businessName = this.businessConfig?.getConfig()?.business?.name || 'IA Comercial';
+      const today = new Date().toLocaleDateString('es-CL', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+
+      // Crear HTML del reporte
+      const reportHTML = this.buildDailyReportHTML(stats, businessName, today);
+
+      // Enviar usando Resend
+      const { Resend } = require('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      const { data, error } = await resend.emails.send({
+        from: `${businessName} <onboarding@resend.dev>`,
+        to: [process.env.EMAIL_TO || process.env.OWNER_EMAIL],
+        subject: `📊 Reporte Diario - ${today}`,
+        html: reportHTML
+      });
+
+      if (error) {
+        console.error('❌ Error al enviar reporte diario:', error);
+        return false;
+      }
+
+      console.log(`✅ Reporte diario enviado exitosamente (ID: ${data?.id})`);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Error en sendDailyReport:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Construir HTML del reporte diario
+   * @param {Object} stats - Estadísticas
+   * @param {string} businessName - Nombre del negocio
+   * @param {string} date - Fecha
+   * @returns {string} HTML del reporte
+   * @private
+   */
+  buildDailyReportHTML(stats, businessName, date) {
+    const totalLeads = stats.total || 0;
+    const calientes = stats.porEstado?.caliente || 0;
+    const tibios = stats.porEstado?.tibio || 0;
+    const frios = stats.porEstado?.frio || 0;
+    const noContactados = stats.noContactados || 0;
+
+    // Estadísticas por canal
+    const porCanal = stats.porCanalEstado || {};
+    const webLeads = porCanal.web?.total || 0;
+    const instagramLeads = porCanal.instagram?.total || 0;
+    const whatsappLeads = porCanal.whatsapp?.total || 0;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f4f4f4; }
+          .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; }
+          .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+          .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid #667eea; }
+          .stat-card.hot { border-left-color: #ff4757; }
+          .stat-card.warm { border-left-color: #ffa502; }
+          .stat-card.cold { border-left-color: #70a1ff; }
+          .stat-number { font-size: 32px; font-weight: bold; color: #667eea; margin: 10px 0; }
+          .stat-label { color: #666; font-size: 14px; }
+          .section-title { color: #667eea; font-size: 18px; font-weight: bold; margin: 25px 0 15px; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+          .channel-list { list-style: none; padding: 0; }
+          .channel-item { padding: 12px; background: #f8f9fa; margin: 8px 0; border-radius: 6px; display: flex; justify-content: space-between; }
+          .footer { text-align: center; padding: 20px; background: #f8f9fa; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0;">📊 Reporte Diario</h1>
+            <p style="margin: 10px 0 0; opacity: 0.9;">${businessName}</p>
+            <p style="margin: 5px 0 0; opacity: 0.8; font-size: 14px;">${date}</p>
+          </div>
+          
+          <div class="content">
+            <div class="section-title">📈 Resumen General</div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-number">${totalLeads}</div>
+                <div class="stat-label">Total Leads</div>
+              </div>
+              <div class="stat-card hot">
+                <div class="stat-number" style="color: #ff4757;">${calientes}</div>
+                <div class="stat-label">🔥 Calientes</div>
+              </div>
+              <div class="stat-card warm">
+                <div class="stat-number" style="color: #ffa502;">${tibios}</div>
+                <div class="stat-label">🌡️ Tibios</div>
+              </div>
+              <div class="stat-card cold">
+                <div class="stat-number" style="color: #70a1ff;">${frios}</div>
+                <div class="stat-label">❄️ Fríos</div>
+              </div>
+            </div>
+
+            ${noContactados > 0 ? `
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <strong>⚠️ Atención:</strong> Hay <strong>${noContactados}</strong> lead(s) sin contactar
+            </div>
+            ` : ''}
+
+            <div class="section-title">📱 Leads por Canal</div>
+            <ul class="channel-list">
+              <li class="channel-item">
+                <span>🌐 Web</span>
+                <strong>${webLeads}</strong>
+              </li>
+              <li class="channel-item">
+                <span>📸 Instagram</span>
+                <strong>${instagramLeads}</strong>
+              </li>
+              <li class="channel-item">
+                <span>💚 WhatsApp</span>
+                <strong>${whatsappLeads}</strong>
+              </li>
+            </ul>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="https://sendspress.cl/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                Ver Dashboard Completo
+              </a>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p><strong>${businessName}</strong> - Sistema de IA Comercial</p>
+            <p>Reporte generado automáticamente</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 }
 
 module.exports = FollowUpService;

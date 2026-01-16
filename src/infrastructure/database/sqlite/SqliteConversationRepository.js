@@ -118,6 +118,22 @@ class SqliteConversationRepository extends IConversationRepository {
       return result;
     });
   }
+
+  /**
+   * Marcar una conversación como completada
+   * @param {string} sessionId - ID de la sesión
+   * @returns {boolean} True si se actualizó correctamente
+   */
+  markAsCompleted(sessionId) {
+    const stmt = this.db.prepare(`
+      UPDATE conversaciones 
+      SET completed = 1, fecha_actualizacion = CURRENT_TIMESTAMP 
+      WHERE session_id = ?
+    `);
+    
+    const result = stmt.run(sessionId);
+    return result.changes > 0;
+  }
 }
 
 module.exports = SqliteConversationRepository;
