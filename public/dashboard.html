@@ -520,13 +520,46 @@
                 padding: 10px;
             }
         }
+
+        /* Botón de Estrategia IA */
+        .btn-strategy {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-strategy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-strategy:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header con título y estadísticas -->
         <div class="header">
-            <h1>📊 Panel de Leads</h1>
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; flex: 1;">
+                <h1>📊 Panel de Leads</h1>
+                <a href="/estrategia-comercial" class="btn-strategy" title="Configurar comportamiento del asistente IA">
+                    🎯 Estrategia IA
+                </a>
+            </div>
             <div class="stats" id="stats">
                 <div class="stat-card">
                     <h3 id="stat-total">0</h3>
